@@ -10,9 +10,10 @@ TEST(CalculatorTest, Add) {
 	EXPECT_EQ(3, c.add(1, 2));
 }
 
-TEST(CalculatorTest, Substract) {
+TEST(CalculatorTest, AddWithRandom) {
 	Calculator c;
-	EXPECT_EQ(5, c.substact(10, 4));
+	c.setRandGenerator(new FakeRandomGeneratorImpl(3));
+	EXPECT_EQ(6, c.addWithRandom(1, 2));
 }
 
 int _tmain(int argc, _TCHAR* argv[])
