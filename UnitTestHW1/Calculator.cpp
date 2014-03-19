@@ -18,19 +18,6 @@ int Calculator::genRandom() {
 	return rand();
 }
 
-/*
-void Calculator::setRandGenerator(RandomGenerator *r) {
-	if (this->randGenerator) {
-		delete this->randGenerator;
-	}
-	this->randGenerator = r;
+int TestableCalculator::genRandom() {
+	return this->random;
 }
-
-int RandomGeneratorImpl::genRandom() {
-	return rand();
-}
-
-int FakeRandomGeneratorImpl::genRandom() {
-	return this->r;
-}
-*/

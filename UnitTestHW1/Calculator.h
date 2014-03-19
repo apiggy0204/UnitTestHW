@@ -2,39 +2,22 @@
 
 class RandomGenerator;
 
-class Calculator
-{
+class Calculator {
 public:
 	Calculator();
 	~Calculator();
 	int add(int x, int y);
 	int addWithRandom(int x, int y);
 
-	//Property Injection for UT
-	void setRandGenerator(RandomGenerator *r);
-
 protected:
-	int genRandom();
-};
-
-/*
-class RandomGenerator {
-public:
-	virtual int genRandom() = 0;
-	virtual ~RandomGenerator() {};
-};
-
-class RandomGeneratorImpl : public RandomGenerator {
-public:
 	virtual int genRandom();
-	virtual ~RandomGeneratorImpl() {}
 };
 
-class FakeRandomGeneratorImpl : public RandomGenerator {
+class TestableCalculator : public Calculator {
 public:
-	FakeRandomGeneratorImpl(int r) { this->r = r; }
+	TestableCalculator() { this->random = 0; }
+	void setRandom(int random) { this->random = random; }
+protected:
 	virtual int genRandom();
-	virtual ~FakeRandomGeneratorImpl() {}
-	int r;
+	int random;
 };
-*/
