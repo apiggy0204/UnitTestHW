@@ -11,14 +11,15 @@ int Calculator::add(int x, int y) {
 }
 
 int Calculator::addWithRandom(int x, int y) {
-	return x + y + genRandom();
-}
-
-int Calculator::genRandom() {
-	return rand();
+	return x + y + this->randGenerator->genRandom();
 }
 
 /*
+int Calculator::genRandom() {
+	return rand();
+}*/
+
+
 void Calculator::setRandGenerator(RandomGenerator *r) {
 	if (this->randGenerator) {
 		delete this->randGenerator;
@@ -33,4 +34,3 @@ int RandomGeneratorImpl::genRandom() {
 int FakeRandomGeneratorImpl::genRandom() {
 	return this->r;
 }
-*/

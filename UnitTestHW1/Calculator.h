@@ -14,10 +14,10 @@ public:
 	void setRandGenerator(RandomGenerator *r);
 
 protected:
-	int genRandom();
+	//virtual int genRandom();
+	RandomGenerator *randGenerator = 0;
 };
 
-/*
 class RandomGenerator {
 public:
 	virtual int genRandom() = 0;
@@ -37,4 +37,3 @@ public:
 	virtual ~FakeRandomGeneratorImpl() {}
 	int r;
 };
-*/

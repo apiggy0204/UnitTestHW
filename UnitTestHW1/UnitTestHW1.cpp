@@ -4,6 +4,14 @@
 #include "stdafx.h"
 #include "Calculator.h"
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
+
+using ::testing::Return;
+
+class MockRandomGenerator : public RandomGenerator {
+public:
+	MOCK_METHOD0(genRandom, int());
+};
 
 TEST(CalculatorTest, Add) {
 	Calculator c;
@@ -12,7 +20,9 @@ TEST(CalculatorTest, Add) {
 
 TEST(CalculatorTest, AddWithRandom) {
 	Calculator c;
-	c.setRandGenerator(new FakeRandomGeneratorImpl(3));
+	MockRandomGenerator r;
+	ON_CALL(r, genRandom()).WillByDefault(Return(3));
+	c.setRandGenerator(&r);
 	EXPECT_EQ(6, c.addWithRandom(1, 2));
 }
 
