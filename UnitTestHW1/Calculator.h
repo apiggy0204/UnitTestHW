@@ -1,4 +1,5 @@
 #pragma once
+#include "Log.h"
 
 class RandomGenerator;
 
@@ -9,13 +10,15 @@ public:
 	~Calculator();
 	int add(int x, int y);
 	int addWithRandom(int x, int y);
+	int divide(int x, int y);
 
 	//Property Injection for UT
 	void setRandGenerator(RandomGenerator *r);
+	void setLog(Log *log);
 
 protected:
-	//virtual int genRandom();
 	RandomGenerator *randGenerator = 0;
+	Log *log = 0;
 };
 
 class RandomGenerator {
@@ -37,3 +40,5 @@ public:
 	virtual ~FakeRandomGeneratorImpl() {}
 	int r;
 };
+
+class DivideByZeroException {};
