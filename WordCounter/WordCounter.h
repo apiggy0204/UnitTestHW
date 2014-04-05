@@ -25,8 +25,8 @@ private:
 	set<string> excludedWordList;
 	bool hasMinWordLength;
 	bool isCaseSensitive;	
-	FileAccessManager *fileAccessMgr;
-	IniAccessManager *iniAccessMgr;
+	FileAccessManager *fileAccessMgr = 0;
+	IniAccessManager *iniAccessMgr = 0;
 };
 
 class ManagerFactory {

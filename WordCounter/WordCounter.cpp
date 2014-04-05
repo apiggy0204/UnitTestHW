@@ -8,6 +8,29 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+using ::testing::Return;
+
+class MockIniAccessManager : public IniAccessManager {
+public:
+	MOCK_METHOD1(load, void(string));
+	MOCK_CONST_METHOD1(getIntWithKey, int(string keyName));
+	MOCK_CONST_METHOD2(getStringSetWithKey, set<string>(string keyName, string delim));
+	MOCK_CONST_METHOD1(getBoolWithKey, bool(string keyName));
+};
+
+class MockFileAccessManager : public FileAccessManager {
+public:
+	MOCK_METHOD1(getWordCountMap, map<string, int>(string filename));
+};
+
+class MockManagerFactory : public ManagerFactory {
+public:
+	MockManagerFactory() {}
+	~MockManagerFactory() {}
+	FileAccessManager *getFileAccessManager() const { return new MockFileAccessManager; }
+	IniAccessManager *getIniAccessManager() const { return new MockIniAccessManager; }
+};
+
 TEST(FileAccessManagerTest, ReadSimpleFile) {
 	FileAccessManager fileMgr;
 	map<string, int> wordCountMap = fileMgr.getWordCountMap("hello_world.txt");
@@ -103,27 +126,23 @@ TEST(IniAccessManagerTest, getBool_WillReturnFalse_KeyNotExists) {
 	EXPECT_FALSE(iniMgr.getBoolWithKey("notexistentkey"));
 }
 
-class MockIniAccessManager : public IniAccessManager {
-public:
-	MOCK_METHOD1(load, void(string));
-	MOCK_CONST_METHOD1(getIntWithKey, int(string keyName));
-	MOCK_CONST_METHOD2(getStringSetWithKey, set<string>(string keyName, string delim));
-	MOCK_CONST_METHOD1(getBoolWithKey, bool(string keyName));
-};
+TEST(WordCounterTest, query_default) {
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hello", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hello", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
 
-class MockFileAccessManager : public FileAccessManager {
-public:
-	MOCK_METHOD1(getWordCountMap, map<string, int>(string filename));	
-};
-
-/*
-class MockManagerFactory : public ManagerFactory {
-public:
-	MockManagerFactory() {}
-	~MockManagerFactory() {}
-	FileAccessManager *getFileAccessManager() const { return new MockFileAccessManager; }
-	IniAccessManager *getIniAccessManager() const { return new MockIniAccessManager; }
-};*/
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.load("test.txt");
+	EXPECT_EQ(1, counter.query("hello"));
+	EXPECT_EQ(1, counter.query("world"));
+	EXPECT_EQ(1, counter.query("Hello"));
+	EXPECT_EQ(1, counter.query("worlD"));	
+}
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -140,7 +159,7 @@ WordCounter::WordCounter(/*const ManagerFactory& factory*/)
 	this->iniAccessMgr = factory.getIniAccessManager();
 	this->minWordLength = 0;
 	this->hasMinWordLength = false;
-	this->isCaseSensitive = false;	
+	this->isCaseSensitive = false;
 }
 
 WordCounter::~WordCounter()
@@ -156,7 +175,7 @@ void WordCounter::setFileAccessManager(FileAccessManager *fileMgr) {
 
 void WordCounter::setIniAccessManager(IniAccessManager *iniMgr) {
 	if (this->iniAccessMgr) { delete this->iniAccessMgr; }
-	this->iniAccessMgr = iniMgr;
+	this->iniAccessMgr = iniMgr;	
 }
 
 void WordCounter::load(string filename) {
