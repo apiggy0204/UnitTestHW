@@ -1,0 +1,4 @@
+key=value
+key2=123
+key3=a;b;c
+key4=true
