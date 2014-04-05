@@ -7,6 +7,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTestHW1", "UnitTestHW1\
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{035FDFFE-25DA-45B1-8CE1-6636988CACDB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordCounter", "WordCounter\WordCounter.vcxproj", "{C1F391E8-C0D5-4738-9275-B6D35681FB48}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WordCounterTest", "WordCounterTest\WordCounterTest.vcxproj", "{6D6305FB-2440-4195-B865-2E2E3911C5AC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C1F391E8-C0D5-4738-9275-B6D35681FB48} = {C1F391E8-C0D5-4738-9275-B6D35681FB48}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -17,6 +24,14 @@ Global
 		{6A0A337D-2368-4AA0-9CEC-7795E180FE1F}.Debug|Win32.Build.0 = Debug|Win32
 		{6A0A337D-2368-4AA0-9CEC-7795E180FE1F}.Release|Win32.ActiveCfg = Release|Win32
 		{6A0A337D-2368-4AA0-9CEC-7795E180FE1F}.Release|Win32.Build.0 = Release|Win32
+		{C1F391E8-C0D5-4738-9275-B6D35681FB48}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C1F391E8-C0D5-4738-9275-B6D35681FB48}.Debug|Win32.Build.0 = Debug|Win32
+		{C1F391E8-C0D5-4738-9275-B6D35681FB48}.Release|Win32.ActiveCfg = Release|Win32
+		{C1F391E8-C0D5-4738-9275-B6D35681FB48}.Release|Win32.Build.0 = Release|Win32
+		{6D6305FB-2440-4195-B865-2E2E3911C5AC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6D6305FB-2440-4195-B865-2E2E3911C5AC}.Debug|Win32.Build.0 = Debug|Win32
+		{6D6305FB-2440-4195-B865-2E2E3911C5AC}.Release|Win32.ActiveCfg = Release|Win32
+		{6D6305FB-2440-4195-B865-2E2E3911C5AC}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

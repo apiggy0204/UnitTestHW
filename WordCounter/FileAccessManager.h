@@ -8,9 +8,9 @@ class FileAccessManager
 {
 public:
 	FileAccessManager();
-	~FileAccessManager();
+	virtual ~FileAccessManager();
 	typedef map<string, int> Map;
-	Map getWordCountMap(string filename);
+	virtual Map getWordCountMap(string filename);
 private:
 	string removePunctuation(string str);
 };

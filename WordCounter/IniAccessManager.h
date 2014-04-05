@@ -9,10 +9,10 @@ public:
 	IniAccessManager();
 	virtual ~IniAccessManager();
 	
-	void load(string filename);
-	int getIntWithKey(string iniName) const;
-	set<string> getStringSetWithKey(string keyName, string seperator = ";") const;
-	bool getBoolWithKey(string keyName) const;
+	virtual void load(string filename);
+	virtual int getIntWithKey(string iniName) const;
+	virtual set<string> getStringSetWithKey(string keyName, string delim = ";") const;
+	virtual bool getBoolWithKey(string keyName) const;
 
 private:
 	map<string, string> iniMap;
