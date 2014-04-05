@@ -126,7 +126,7 @@ TEST(IniAccessManagerTest, getBool_WillReturnFalse_KeyNotExists) {
 	EXPECT_FALSE(iniMgr.getBoolWithKey("notexistentkey"));
 }
 
-TEST(WordCounterTest, query_default) {
+TEST(WordCounterTest, query_Default) {
 	MockFileAccessManager *fileMgr = new MockFileAccessManager;
 	map<string, int> wordCountMap;
 	wordCountMap.insert(pair<string, int>("hello", 1));
@@ -144,6 +144,34 @@ TEST(WordCounterTest, query_default) {
 	EXPECT_EQ(1, counter.query("worlD"));	
 }
 
+TEST(WordCounterTest, query_CaseSensitive) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hello", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hello", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));	
+
+	// Ini
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(false));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(0));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(set<string>()));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(2, counter.query("hello"));
+	EXPECT_EQ(2, counter.query("world"));
+	EXPECT_EQ(2, counter.query("Hello"));
+	EXPECT_EQ(2, counter.query("worlD"));
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	::testing::InitGoogleTest(&argc, argv);
@@ -159,7 +187,7 @@ WordCounter::WordCounter(/*const ManagerFactory& factory*/)
 	this->iniAccessMgr = factory.getIniAccessManager();
 	this->minWordLength = 0;
 	this->hasMinWordLength = false;
-	this->isCaseSensitive = false;
+	this->isCaseSensitive = true;
 }
 
 WordCounter::~WordCounter()
@@ -182,24 +210,40 @@ void WordCounter::load(string filename) {
 	this->wordCountMap = this->fileAccessMgr->getWordCountMap(filename);
 }
 
-int WordCounter::query(string str) const {	
+string toLower(string input) {
+	string data = input;
+	std::transform(data.begin(), data.end(), data.begin(), ::tolower);
+	return data;
+}
+
+int WordCounter::query(string str) const {
 	map<string, int>::const_iterator it;
-	if ((it = this->wordCountMap.find(str)) != this->wordCountMap.end()) {
-		return it->second;
+
+	if (this->isCaseSensitive) {
+		if ((it = this->wordCountMap.find(str)) != this->wordCountMap.end()) {
+			return it->second;
+		}
+		else {
+			return 0;
+		}
 	}
 	else {
-		return 0;
+		int ret = 0;
+		for (it = wordCountMap.begin(); it != wordCountMap.end(); ++it) {
+			cout << "toLower: " << toLower(it->first) << " " << toLower(str) << endl;
+			if (toLower(it->first) == toLower(str)) ret += it->second;				
+		}
+		return ret;
 	}
 }
 
 void WordCounter::loadIni(string filename) {
+	this->iniAccessMgr->load(filename);
 	this->isCaseSensitive = this->iniAccessMgr->getBoolWithKey("isCaseSensitive");
 	this->minWordLength = this->iniAccessMgr->getIntWithKey("minWordLength");	
 	this->hasMinWordLength = (this->minWordLength > 0) ? true : false;
 	this->excludedWordList = this->iniAccessMgr->getStringSetWithKey("excludedWordList");
 }
-
-
 
 FileAccessManager *ManagerFactory::getFileAccessManager() const {
 	return new FileAccessManager;
