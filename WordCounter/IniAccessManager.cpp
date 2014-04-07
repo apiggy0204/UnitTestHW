@@ -23,7 +23,7 @@ void IniAccessManager::load(string filename) {
 		if (seperateIndex != string::npos) {
 			key = line.substr(0, seperateIndex);
 			value = line.substr(seperateIndex + 1);
-			cout << "key: " << key << ", value: " << value << endl;
+			//cout << "key: " << key << ", value: " << value << endl;
 			iniMap[key] = value;
 		}
 	}

@@ -12,21 +12,23 @@ class WordCounter
 public:
 	WordCounter(/*const ManagerFactory& factory*/);
 	~WordCounter();
-	void load(string filename);
-	void loadIni(string filename);
-	int query(string str) const;
+	void load(const string& filename);
+	void loadIni(const string& filename);
+	int query(const string& str) const;
 
 	void setFileAccessManager(FileAccessManager *fileMgr);
 	void setIniAccessManager(IniAccessManager *iniMgr);
 
 private:
 	map<string, int> wordCountMap;
-	int minWordLength;
+	unsigned int minWordLength;
 	set<string> excludedWordList;
 	bool hasMinWordLength;
 	bool isCaseSensitive;	
 	FileAccessManager *fileAccessMgr = 0;
 	IniAccessManager *iniAccessMgr = 0;
+
+	bool isExcludedWord(const string& str) const;
 };
 
 class ManagerFactory {

@@ -126,7 +126,7 @@ TEST(IniAccessManagerTest, getBool_WillReturnFalse_KeyNotExists) {
 	EXPECT_FALSE(iniMgr.getBoolWithKey("notexistentkey"));
 }
 
-TEST(WordCounterTest, query_Default) {
+TEST(WordCounterTest, query_CaseSensitive) {
 	MockFileAccessManager *fileMgr = new MockFileAccessManager;
 	map<string, int> wordCountMap;
 	wordCountMap.insert(pair<string, int>("hello", 1));
@@ -144,7 +144,7 @@ TEST(WordCounterTest, query_Default) {
 	EXPECT_EQ(1, counter.query("worlD"));	
 }
 
-TEST(WordCounterTest, query_CaseSensitive) {
+TEST(WordCounterTest, query_CaseInsensitive) {
 	// Text file
 	MockFileAccessManager *fileMgr = new MockFileAccessManager;
 	map<string, int> wordCountMap;
@@ -170,6 +170,219 @@ TEST(WordCounterTest, query_CaseSensitive) {
 	EXPECT_EQ(2, counter.query("world"));
 	EXPECT_EQ(2, counter.query("Hello"));
 	EXPECT_EQ(2, counter.query("worlD"));
+}
+
+TEST(WordCounterTest, query_CaseSensitive_MinWordLength) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(true));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(4));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(set<string>()));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(0, counter.query("hi"));
+	EXPECT_EQ(1, counter.query("world"));
+	EXPECT_EQ(0, counter.query("Hi"));
+	EXPECT_EQ(1, counter.query("worlD"));
+}
+
+TEST(WordCounterTest, query_CaseInsensitive_ExcludedWordList) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));	
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	set<string> excludedStrings;	
+	excludedStrings.insert("world");
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(false));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(0));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(excludedStrings));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(2, counter.query("hi"));
+	EXPECT_EQ(0, counter.query("world"));
+	EXPECT_EQ(2, counter.query("Hi"));
+	EXPECT_EQ(0, counter.query("worlD"));
+}
+
+TEST(WordCounterTest, query_CaseInsensitive_ExcludedWordList_MinWordLength) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));	
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	set<string> excludedStrings;
+	excludedStrings.insert("HI");	
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(false));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(5));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(excludedStrings));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(0, counter.query("hi"));
+	EXPECT_EQ(2, counter.query("world"));
+	EXPECT_EQ(0, counter.query("Hi"));
+	EXPECT_EQ(2, counter.query("worlD"));
+}
+
+TEST(WordCounterTest, query_CaseInsensitive_MinWordLength) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(false));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(5));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(set<string>()));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(0, counter.query("hi"));
+	EXPECT_EQ(2, counter.query("world"));
+	EXPECT_EQ(0, counter.query("Hi"));
+	EXPECT_EQ(2, counter.query("worlD"));
+}
+
+TEST(WordCounterTest, query_CaseSensitive_ExcludedWordList) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	set<string> excludedStrings;
+	excludedStrings.insert("Hi");
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(true));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(0));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(excludedStrings));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(1, counter.query("hi"));
+	EXPECT_EQ(1, counter.query("world"));
+	EXPECT_EQ(0, counter.query("Hi"));
+	EXPECT_EQ(1, counter.query("worlD"));
+}
+
+TEST(WordCounterTest, query_CaseInsensitive_MinWordLength_ExcludedWordList) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	wordCountMap.insert(pair<string, int>("verylongword", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	set<string> excludedStrings;
+	excludedStrings.insert("world");
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(false));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(5));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(excludedStrings));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(0, counter.query("hi"));
+	EXPECT_EQ(0, counter.query("world"));
+	EXPECT_EQ(0, counter.query("Hi"));
+	EXPECT_EQ(0, counter.query("worlD"));
+	EXPECT_EQ(1, counter.query("VeryLongWord"));
+}
+
+TEST(WordCounterTest, query_CaseSensitive_MinWordLength_ExcludedWordList) {
+	// Text file
+	MockFileAccessManager *fileMgr = new MockFileAccessManager;
+	map<string, int> wordCountMap;
+	wordCountMap.insert(pair<string, int>("hi", 1));
+	wordCountMap.insert(pair<string, int>("world", 1));
+	wordCountMap.insert(pair<string, int>("Hi", 1));
+	wordCountMap.insert(pair<string, int>("worlD", 1));
+	wordCountMap.insert(pair<string, int>("verylongword", 1));
+	wordCountMap.insert(pair<string, int>("VeryLongWord", 1));
+	EXPECT_CALL(*fileMgr, getWordCountMap("test.txt")).WillOnce(Return(wordCountMap));
+
+	// Ini
+	set<string> excludedStrings;
+	excludedStrings.insert("verylongword");
+	excludedStrings.insert("world");
+	MockIniAccessManager *iniMgr = new MockIniAccessManager;
+	EXPECT_CALL(*iniMgr, getBoolWithKey("isCaseSensitive")).WillOnce(Return(true));
+	EXPECT_CALL(*iniMgr, getIntWithKey("minWordLength")).WillOnce(Return(5));
+	EXPECT_CALL(*iniMgr, getStringSetWithKey("excludedWordList", ";")).WillOnce(Return(excludedStrings));
+
+	// Testing query
+	WordCounter counter;
+	counter.setFileAccessManager(fileMgr);
+	counter.setIniAccessManager(iniMgr);
+	counter.loadIni("test.ini");
+	counter.load("test.txt");
+	EXPECT_EQ(0, counter.query("hi"));
+	EXPECT_EQ(0, counter.query("world"));
+	EXPECT_EQ(0, counter.query("Hi"));
+	EXPECT_EQ(1, counter.query("worlD"));
+	EXPECT_EQ(0, counter.query("verylongword"));
+	EXPECT_EQ(1, counter.query("VeryLongWord"));
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -206,43 +419,49 @@ void WordCounter::setIniAccessManager(IniAccessManager *iniMgr) {
 	this->iniAccessMgr = iniMgr;	
 }
 
-void WordCounter::load(string filename) {
+void WordCounter::load(const string& filename) {
 	this->wordCountMap = this->fileAccessMgr->getWordCountMap(filename);
 }
 
-string toLower(string input) {
+string toLower(const string& input) {
 	string data = input;
 	std::transform(data.begin(), data.end(), data.begin(), ::tolower);
 	return data;
 }
 
-int WordCounter::query(string str) const {
+int WordCounter::query(const string& str) const {
 	map<string, int>::const_iterator it;
+	int ret = 0; 
 
-	if (this->isCaseSensitive) {
-		if ((it = this->wordCountMap.find(str)) != this->wordCountMap.end()) {
-			return it->second;
-		}
-		else {
-			return 0;
+	for (it = wordCountMap.begin(); it != wordCountMap.end(); ++it) {
+		//cout << "toLower: " << toLower(it->first) << " " << toLower(str) << endl;
+		if (!this->hasMinWordLength || str.length() >= this->minWordLength) {
+			if ((this->isCaseSensitive && it->first == str) || (!this->isCaseSensitive && toLower(it->first) == toLower(str))) {									
+				if (!this->isExcludedWord(str))
+					ret += it->second;
+			}
 		}
 	}
-	else {
-		int ret = 0;
-		for (it = wordCountMap.begin(); it != wordCountMap.end(); ++it) {
-			cout << "toLower: " << toLower(it->first) << " " << toLower(str) << endl;
-			if (toLower(it->first) == toLower(str)) ret += it->second;				
-		}
-		return ret;
-	}
+
+	return ret;	
 }
 
-void WordCounter::loadIni(string filename) {
+void WordCounter::loadIni(const string& filename) {
 	this->iniAccessMgr->load(filename);
 	this->isCaseSensitive = this->iniAccessMgr->getBoolWithKey("isCaseSensitive");
 	this->minWordLength = this->iniAccessMgr->getIntWithKey("minWordLength");	
 	this->hasMinWordLength = (this->minWordLength > 0) ? true : false;
 	this->excludedWordList = this->iniAccessMgr->getStringSetWithKey("excludedWordList");
+}
+
+bool WordCounter::isExcludedWord(const string& str) const {	
+	set<string>::const_iterator it;
+	for (it = this->excludedWordList.begin(); it != this->excludedWordList.end(); ++it) {
+		if ((this->isCaseSensitive && *it == str) || (!this->isCaseSensitive && toLower(*it) == toLower(str)))
+			return true;
+	}
+
+	return false;
 }
 
 FileAccessManager *ManagerFactory::getFileAccessManager() const {
@@ -251,3 +470,4 @@ FileAccessManager *ManagerFactory::getFileAccessManager() const {
 IniAccessManager *ManagerFactory::getIniAccessManager() const {
 	return new IniAccessManager;
 }
+
